@@ -25,11 +25,6 @@ required:true
 status:{
 type:Boolean,
 default:false
-},
-
-class_count:{
-    type:Number,
-    default:1
 }
 })
 

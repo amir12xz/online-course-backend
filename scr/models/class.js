@@ -1,6 +1,7 @@
 const mongo=require('mongoose')
 
 const schema=new mongo.Schema({
+
 course:{
 type:mongo.Schema.Types.ObjectId,
 ref:'course'
@@ -33,12 +34,14 @@ required:true
 
 joinlink:{
 type:String,
-required:true
+required:true,
+default:null
 },
 
 recordurl:{
 type:String,
-required:true
+required:true,
+default:null
 },
 
 status:{
@@ -47,4 +50,4 @@ default:false
 }
 })
 
-module.exports=mongo.model('class',schema)
+module.exports=mongo.model('courseclass',schema)

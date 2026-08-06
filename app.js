@@ -7,11 +7,15 @@ const cookieparser = require('cookie-parser')
 const ratelimit = require('express-rate-limit')
 require('dotenv').config()
 
+//routers
+const profile=require('./scr/routes/profile')
+const auth=require('./scr/routes/auth')
+
 
 const app=express()
 
 app.use(helmet())                         
-app.use(mongoSanitize())      
+app.use(mongosanitize())      
 app.use(hpp())
 
 const limiter = ratelimit({
@@ -25,12 +29,15 @@ const limiter = ratelimit({
 
 app.use('/api',limiter)
 
+
 app.use(express.json({limit:'10kb'})) 
 app.use(express.urlencoded({extended:true }));
 app.use(cookieparser())
 
 //route
 
+app.use('/api/profile',profile)
+app.use('/api/auth',auth)
 
 app.use((req,res)=>{
     res.status(404).json({

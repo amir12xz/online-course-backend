@@ -15,7 +15,7 @@ trim:true
 },
 
 phone:{
-type:Number,   
+type:String,   
 required:true,
 unique:true,
 trim:true
@@ -29,6 +29,22 @@ default:false
 avatar:{
 type:String,
 default:null
+},
+
+password:{
+type:String,
+required:true,
+trim:true
+},
+
+role:{
+type:String,
+enum:['user','admin'],
+default:'user'
+},
+verified:{
+  type:Boolean,
+  default:false
 }
 
   },
@@ -41,10 +57,4 @@ module.exports =mongo.model('user',schema);
 
 
 
-/*const mongo=require('mongoose')
-
-const schema=new mongo.Schema({
-
-})
-
-module.exports=mongo.model('',schema)*/
+ 
