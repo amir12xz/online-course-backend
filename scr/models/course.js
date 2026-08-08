@@ -21,10 +21,9 @@ price:{
 type:Number,
 required:true
 },
-
-status:{
-type:Boolean,
-default:false
+spotplayercourseid:{
+type:String,
+default:null
 }
 })
 

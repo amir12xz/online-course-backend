@@ -7,20 +7,17 @@ module.exports=async(req,res)=>{
     const token=req.cookies.token
     const decode=jwt.verify(token,process.env.JWT)
 
-    if(!decode)
-        return res.status(401).json({
-    success:false,
-    message:'token expired or invalid'
-        })
 
-    const user=await usermodel.findById(decode.id).select('-password')
-    const course=await enrollmentmodel.find({user:user._id}).populate('course')
+    const user=await usermodel.findById(decode.id).select('-password ')
+    const course=await enrollmentmodel.find({user:user._id,status:'success'}).populate('course')
 
     if(user.verified){
+    const userdata = user.toObject()
+    delete userdata.verified
  return res.status(200).json({
     success:true,
     message:'user found',
-    userdata:user,
+    userdata:userdata,
     courses:course
  })
     }else

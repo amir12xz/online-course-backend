@@ -9,7 +9,7 @@ module.exports.checkpass=async(req,res,next)=>{
 try{
 const {phone,password}=req.body
 
-const user=await usermodel.findOne({phone})
+const user=await usermodel.findOne({phone,verified:true})
 
 if(!user)
 return res.status(401).json({
@@ -88,9 +88,7 @@ const otpbodycode=req.body.code
 const token=req.cookies.tempToken
 const payload=jwt.verify(token,process.env.JWT)
 
-console.log("PHONE:", payload.phone)
-console.log("CODE:", otpbodycode)
-console.log(await otpmodel.find({phone: payload.phone}))
+
 
 const otpcheck=await otpmodel.findOne({
 phone:payload.phone,
@@ -156,10 +154,23 @@ try{
 const token=req.cookies.tempToken
 const payload=jwt.verify(token,process.env.JWT)
 
+const otp = await otpmodel.findOne({
+    phone:payload.phone,
+    used:false
+})
+
+if (otp && otp.expiredAt > new Date()) {
+    return res.status(401).json({
+        success:false,
+        message:"otp not expires yet"
+    })
+}
+
 await otpmodel.deleteMany({
 phone:payload.phone,
 used:false
 })
+
 
 const otpcode=codemaker()
 

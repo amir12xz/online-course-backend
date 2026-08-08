@@ -10,6 +10,9 @@ require('dotenv').config()
 //routers
 const profile=require('./scr/routes/profile')
 const auth=require('./scr/routes/auth')
+const user=require('./scr/routes/user')
+const mainpage=require('./scr/controllers/mainpage')
+const getcourse=require('./scr/controllers/loadcoursepage')
 
 
 const app=express()
@@ -38,6 +41,10 @@ app.use(cookieparser())
 
 app.use('/api/profile',profile)
 app.use('/api/auth',auth)
+app.use('/api/user',user)
+
+app.get('/mainpage',mainpage)
+app.get('/getcourse/:courseid',getcourse)
 
 app.use((req,res)=>{
     res.status(404).json({

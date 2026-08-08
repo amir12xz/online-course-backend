@@ -159,6 +159,18 @@ try{
 const token=req.cookies.temptoken
 const payload=jwt.verify(token,process.env.JWT)
 
+const otp = await otpmodel.findOne({
+    phone:payload.phone,
+    used:false
+})
+
+if (otp && otp.expiredAt > new Date()) {
+    return res.status(401).json({
+        success:false,
+        message:"otp not expires yet"
+    })
+}
+
 await otpmodel.deleteMany({
 phone:payload.phone,
 used:false

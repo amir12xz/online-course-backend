@@ -5,7 +5,6 @@ const schema=new mongo.Schema({
 phone:{
 type:Number,   
 required:true,
-unique:true,
 trim:true
 },
 

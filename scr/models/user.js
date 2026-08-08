@@ -21,11 +21,6 @@ unique:true,
 trim:true
 },
 
-isverified:{
-type:Boolean,
-default:false
-},
-
 avatar:{
 type:String,
 default:null
@@ -43,6 +38,10 @@ enum:['user','admin'],
 default:'user'
 },
 verified:{
+  type:Boolean,
+  default:false
+},
+deleted:{
   type:Boolean,
   default:false
 }

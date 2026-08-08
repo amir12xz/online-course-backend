@@ -1,5 +1,7 @@
+const crypto = require('crypto')
+
 function codemaker(){
-    return Math.floor(1000 + Math.random() * 9000)
+    return crypto.randomInt(10000,100000)
 }
 
-module.exports = codemaker
+module.exports=codemaker

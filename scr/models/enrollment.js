@@ -9,7 +9,20 @@ ref:'user'
 course:{
 type:mongo.Schema.Types.ObjectId,
 ref:'course'
-}
+},
+
+
+status:{
+        type:String,
+        enum:['pending','success','faild'],
+        default:'pending'
+    },
+    plicencs:{
+        type:String,
+        default:null
+    }
+
+
 },{
 timestamps:true
 })
