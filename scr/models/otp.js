@@ -2,10 +2,10 @@ const mongo=require('mongoose')
 
 const schema=new mongo.Schema({
 
-phone:{
-type:Number,   
-required:true,
-trim:true
+phone: {
+    type:String,
+    required:true,
+    trim:true
 },
 
 code:{

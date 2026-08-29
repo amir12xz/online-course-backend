@@ -9,18 +9,23 @@ const validator=require('./../middlewares/validator')
 const forgotpassword=require('./../controllers/forgotpassword')
 const forgotPhoneValidator=require("./../validators/forgotpassphone")
 const resetPasswordValidator=require("./../validators/forgotpasspassword")
+const islogin=require('./../middlewares/checkabletologin')
+const changepasswordvalidator=require('./../validators/changepassword')
+const changepassword=require('./../controllers/changepassword')
+const checklogin=require('./../middlewares/islogin')
 
 
-route.post('/register',registerValidator,validator,register.Register,register.checkotp)
-route.post('/applyregister',register.applyregister)
-route.get('/register/otp-again',register.tryotpagain)
+route.post('/register',islogin,registerValidator,validator,register.Register,register.checkotp)
+route.post('/applyregister',islogin,register.applyregister)
+route.post('/register/otp-again',islogin,register.tryotpagain)
 
-route.post('/login',loginValidator,validator,login.checkpass,login.checkotp)
-route.post('/applylogin',login.applylogin)
-route.get('/login/otp-again',login.tryotpagain)
+route.post('/login',islogin,loginValidator,validator,login)
 
-route.post('/forgotpassword/enterphone',forgotPhoneValidator,validator,forgotpassword.enterphone)
-route.post('/forgotpassword/entercode',forgotpassword.checkotp)
-route.post('/forgotpassword/resetpass',resetPasswordValidator,validator,forgotpassword.resetpass)
+route.post('/forgotpassword/enterphone',islogin,forgotPhoneValidator,validator,forgotpassword.enterphone) 
+route.post('/forgotpassword/otpagain',islogin,forgotpassword.otpagain)
+route.post('/forgotpassword/entercode',islogin,forgotpassword.checkotp)
+
+
+route.post('/changepassword',checklogin,changepasswordvalidator,validator,changepassword)
 
 module.exports=route

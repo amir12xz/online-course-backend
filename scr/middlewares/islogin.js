@@ -6,19 +6,25 @@ const token=req.cookies.token
 if(!token)
 return res.status(401).json({
 success:false,
-message:'please login'
+message:'لطفا وارد شوید'
 })
 
 const decode=jwt.verify(token,process.env.JWT)
 
-req.userId=decode.id
+ 
 
 return next()
 
 }catch(err){
+
+        res.clearCookie('token', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax'
+    })
 return res.status(401).json({
 success:false,
-message:'invalid token'
+message:'توکن نامعتبر'
 })
 }
 }

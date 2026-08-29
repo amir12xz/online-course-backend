@@ -14,7 +14,7 @@ ref:'course'
 
 status:{
         type:String,
-        enum:['pending','success','faild'],
+        enum:['pending','success'],
         default:'pending'
     },
     plicencs:{

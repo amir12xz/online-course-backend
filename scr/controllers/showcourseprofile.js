@@ -13,17 +13,17 @@ module.exports=async(req,res)=>{
         const user=await usermodel.findById(decode.id)
 
         if(!user)
-            return res.status(401).json({
+            return res.status(404).json({
             success:false,
-            message:'user not found'
+            message:'کاربر پیدا نشد'
         })
 
         const course=await coursemodel.findById(courseid)
 
         if(!course)
-            return res.status(401).json({
+            return res.status(404).json({
             success:false,
-            message:'course is not exist'
+            message:'همچین دوره ای وجود ندارد'
         })
 
         const enrollment=await enrollmentmodel.findOne({
@@ -35,18 +35,38 @@ module.exports=async(req,res)=>{
         if(enrollment)
             return res.status(200).json({
              success:true,
-             message:'user course:',
+             message:'دوره های کاربر',
+             course,
              enrollment
             })
 
-    return res.status(401).json({
-      success:false
+    return res.status(403).json({
+      success:false,
+      message:'کاربر در این دوره ثبت نام نشده است'
     })
 
     }catch(err){
-        return res.status(401).json({
-      success:false,
-      message:'invalid token'
-    })
+    if (
+            err.name === 'JsonWebTokenError' ||
+            err.name === 'TokenExpiredError'
+        ) {
+            res.clearCookie('token', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'lax'
+})
+
+            return res.status(401).json({
+                success: false,
+                message: 'توکن نامعتبر'
+            })
+        }
+
+        console.log(err)
+
+        return res.status(500).json({
+            success: false,
+            message: 'server error'
+        })
     }
 }

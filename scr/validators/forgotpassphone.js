@@ -4,8 +4,8 @@ module.exports = [
   body("phone")
     .trim()
     .notEmpty()
-    .withMessage("phone is required")
+    .withMessage("شماره تلفن همراه را وارد کنید").bail()
 
     .isMobilePhone("fa-IR")
-    .withMessage("invalid phone number"),
+    .withMessage("شماره نامعتبر است").bail(),
 ];

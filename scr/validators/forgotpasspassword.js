@@ -4,8 +4,8 @@ module.exports = [
   body("password")
     .trim()
     .notEmpty()
-    .withMessage("password is required")
+    .withMessage("لطفا پسوورد را وارد کنید").bail()
 
     .isLength({ min: 8, max: 64 })
-    .withMessage("password must be between 8 and 64 characters"),
+    .withMessage("پسوورد باید بین 8 الی 64 کارکتر باشد").bail(),
 ];

@@ -32,7 +32,8 @@ const transactionSchema=new mongoose.Schema({
 
     authority:{//ایدی پرداخت 
         type:String,
-        unique:true
+        unique:true,
+        sparse:true
     },
 
     refId:{

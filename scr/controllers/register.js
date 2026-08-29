@@ -10,14 +10,47 @@ try{
 const {name,lastname,phone,password}=req.body
 
 const check_phone=await usermodel.findOne({phone})
-
-if(check_phone)
-return res.status(401).json({
-success:false,
-message:'number exist in data base'
-})
-
 const hashed_pass=await bcrypt.hash(password,10)
+const checkotp=await otpmodel.findOne({phone,used:false})
+
+if(checkotp)
+   return res.status(409).json({
+success:false,
+message:'کد قبلا ارسال شده'})
+
+
+if (check_phone) {
+    if (check_phone.verified) {
+        return res.status(409).json({
+            success:false,
+            message:'با این شماره قبلا وارد شده اید '
+        })
+    }
+
+    if(!check_phone.verified){
+     check_phone.name = name
+    check_phone.lastname = lastname
+    check_phone.password = hashed_pass
+    check_phone.deleted = false
+
+    await check_phone.save()
+
+ const temptoken=jwt.sign(
+{phone},
+process.env.JWT,
+{expiresIn:'4m'}
+)
+
+ res.cookie('temptoken',temptoken,{
+ httpOnly:true
+ })
+req.temptoken=temptoken
+
+return next()
+    }
+}
+ 
+
 
 await usermodel.create({
 name,
@@ -73,7 +106,7 @@ expiredAt:new Date(Date.now()+60*1000)
 
 return res.status(200).json({
 success:true,
-message:'otp sent'
+message:'کد ورود برای شما ارسال شد'
 })
 
 }catch(err){
@@ -92,22 +125,25 @@ const token=req.cookies.temptoken
 const payload=jwt.verify(token,process.env.JWT)
 
 
-const otpcheck=await otpmodel.findOne({
-phone:payload.phone,
-code:otpbodycode,
-used:false
-})
+const otpcheck=await otpmodel.findOneAndUpdate(
+    {
+        phone:payload.phone,
+        code:otpbodycode,
+        used:false,
+        expiredAt:{$gt:new Date()}
+    },
+    {
+        $set:{used:true}
+    },
+    {
+        new:true
+    }
+)
 
 if(!otpcheck)
-return res.status(401).json({
-success:false,
-message:'invalid code'
-})
-
-if(otpcheck.expiredAt<new Date())
-return res.status(401).json({
-success:false,
-message:'otp expired'
+return res.status(400).json({
+    success:false,
+    message:'کد نامعتبر یا منقضی شده است'
 })
 
 const user=await usermodel.findOne({
@@ -117,7 +153,7 @@ phone:payload.phone
 if(!user)
 return res.status(404).json({
 success:false,
-message:'user not found'
+message:'کاربر پیدا نشد'
 })
 
 user.verified=true
@@ -126,30 +162,44 @@ await user.save()
 const accessToken=jwt.sign(
 {id:user._id},
 process.env.JWT,
-{expiresIn:'5d'}
+{expiresIn:'30d'}
 )
 
 res.cookie('token',accessToken,{
 httpOnly:true,
 secure:false,
-sameSite:'lax'
+sameSite:'lax',
+maxAge:30*24*60*60*1000
 })
 
-res.clearCookie('temptoken')
+res.clearCookie('temptoken', {
+    httpOnly:true
+})
 
-otpcheck.used=true
-await otpcheck.save()
 
 return res.status(200).json({
 success:true,
-message:'able to register'
+message:'ثبت نام تکمیل شد'
 })
 
 }catch(err){
-return res.status(401).json({
-success:false,
-message:err.message
-})
+
+    if (err.name==='TokenExpiredError') {
+
+        res.clearCookie('temptoken', {
+            httpOnly:true
+        })
+
+        return res.status(401).json({
+            success: false,
+            message:'مدت ثبت نام به پایان رسیده است'
+        })
+    }
+
+    return res.status(401).json({
+        success:false,
+        message:err.message
+    })
 }
 }
 
@@ -157,6 +207,12 @@ module.exports.tryotpagain=async(req,res)=>{
 try{
 
 const token=req.cookies.temptoken
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'مهلت ثبت نام به اتمام رسیده است'
+            })
+        }
 const payload=jwt.verify(token,process.env.JWT)
 
 const otp = await otpmodel.findOne({
@@ -165,9 +221,9 @@ const otp = await otpmodel.findOne({
 })
 
 if (otp && otp.expiredAt > new Date()) {
-    return res.status(401).json({
+    return res.status(409).json({
         success:false,
-        message:"otp not expires yet"
+        message:"کد قبلی منقضی نشده است"
     })
 }
 
@@ -188,10 +244,21 @@ expiredAt:new Date(Date.now()+60*1000)
 
 return res.status(200).json({
 success:true,
-message:'otp sent again'
+message:'کد ارسال شد'
 })
 
 }catch(err){
+
+    if (err.name === 'TokenExpiredError') {
+        res.clearCookie('temptoken', {
+        httpOnly: true
+    })
+        return res.status(401).json({
+            success: false,
+            message: 'مدت ثبت نام به پایان رسیده است'
+        })
+    }
+
 return res.status(401).json({
 success:false,
 message:err.message

@@ -17,7 +17,8 @@ text:{
 },
 
 reply:{
-type:String
+type:String,
+default:null
 }
 },{
 timestamps:true

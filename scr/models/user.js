@@ -52,6 +52,15 @@ timestamps:true
   }
 );
 
+schema.virtual('enrollments', {
+    ref: 'enrollment',
+    localField: '_id',
+    foreignField: 'user'
+})
+
+schema.set('toObject',{virtuals:true })
+schema.set('toJSON',{virtuals:true })
+
 module.exports =mongo.model('user',schema);
 
 
