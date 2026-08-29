@@ -80,7 +80,7 @@ introvideo,
 price:Number(price),
 spotplayercourseid:spotplayerid,
 sessionscount:Number(sessionscount),
-duration:Number(duration),
+duration:duration,
 status,
 tags
 })

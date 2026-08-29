@@ -10,7 +10,7 @@ const userprofile=require('./../controllers/profile')
 route.get('/showprofile',checklog,userdata)
 route.get('/logout',checklog,logout)
 route.get('/showcourse',checklog,showcourselesson)//del
-route.get('/me',userprofile)
+route.get('/me',checklog,userprofile)
 
 
 module.exports=route

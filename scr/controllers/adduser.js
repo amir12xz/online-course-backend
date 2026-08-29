@@ -4,7 +4,7 @@ const sms=require('./../integrations/sms/passwordsms')
 
 module.exports=async(req,res)=>{
   try {
-    const {name,lastname,phone,password}=req.body
+    const {name,lastname,phone,password,role}=req.body
     const userid=req.params.userid
 
     if (userid){
@@ -16,7 +16,7 @@ module.exports=async(req,res)=>{
         })
       }
 
-      const updatedata={ name,lastname,phone }
+      const updatedata={ name,lastname,phone,role}
 
       const user=await usermodel.findByIdAndUpdate(userid,updatedata,{new:true})
 
@@ -66,6 +66,7 @@ module.exports=async(req,res)=>{
         lastname,
         phone,
         password:hashedpassword,
+        role,
         verified:true
       })
 
