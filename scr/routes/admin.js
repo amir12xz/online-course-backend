@@ -23,12 +23,14 @@ const getuserforadmin=require('./../controllers/getuserforadmin')
 const finduserbyphone=require('./../controllers/getuserbyphone')
 const addusercourse=require('./../controllers/addusercourse')
 const adduserval=require('./../validators/adduseradmin')
+const edituserval=require('./../validators/edituseradmin')
 
 route.post('/addcourse/:courseid?',isadmin,checkid('courseid'),courseupload.fields([
 {name:'thumbnail',maxCount:1},
 {name:'introvideo',maxCount:1}
 ]),addcourse)
-route.post('/adduser/:userid?',isadmin,checkid('userid'),adduserval,validator,adduser)
+route.post('/adduser/:userid',isadmin,checkid('userid'),edituserval,validator,adduser)
+route.post('/adduser',isadmin,adduserval,validator,adduser)
 route.post('/deleteuser/:id',isadmin,checkid('id'),deleteacount)
 route.post('/replycomment/:id',isadmin,checkid('id'),replycomment)
 route.post('/deletecomment/:id',isadmin,checkid('id'),deletecomment)

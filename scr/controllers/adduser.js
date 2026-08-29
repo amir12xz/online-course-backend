@@ -3,71 +3,97 @@ const bcrypt=require('bcrypt')
 const sms=require('./../integrations/sms/passwordsms')
 
 module.exports=async(req,res)=>{
-try{
-const {name,lastname,phone,password}=req.body
-const userid=req.params.userid
+  try {
+    const {name,lastname,phone,password}=req.body
+    const userid=req.params.userid
 
-if(userid){
-const updatedata={name,lastname,phone}
+    if (userid){
+      const existing=await usermodel.findOne({phone,_id:{$ne:userid}})
+      if (existing) {
+        return res.status(409).json({
+          success:false,
+          message:'این شماره موبایل قبلاً برای کاربر دیگری ثبت شده است'
+        })
+      }
 
-const user=await usermodel.findByIdAndUpdate(
-userid,
-updatedata,
-{new:true}
-)
+      const updatedata={ name,lastname,phone }
 
-if(!user){
-return res.status(404).json({
-success:false,
-message:'کاربر پیدا نشد'
-})
-}
+      const user=await usermodel.findByIdAndUpdate(userid,updatedata,{new:true})
 
-if(password){
-user.password=await bcrypt.hash(password,10)
-await user.save()
-await sms(password,user.phone)
-}
+      if (!user){
+        return res.status(404).json({
+          success:false,
+          message:'کاربر پیدا نشد'
+        })
+      }
 
+      if (password&&password.trim()){
+        user.password=await bcrypt.hash(password,10)
+        await user.save()
+        // await sms(password, user.phone)
+      }
 
+      const safeUser=user.toObject()
+      delete safeUser.password
 
-return res.status(200).json({
-success:true,
-message:'کاربر ویرایش شد',
-user
-})
+      return res.status(200).json({
+        success:true,
+        message:'کاربر ویرایش شد',
+        user:safeUser
+      })
 
-}else{
-const userr = await usermodel.findOne({phone})
+    } else{
+      // ساخت کاربر جدید
+      if (!password||!password.trim()) {
+        return res.status(400).json({
+          success:false,
+          message:'رمز عبور الزامی است'
+        })
+      }
 
-if (userr) {
-    return res.status(409).json({
+      const userr=await usermodel.findOne({phone})
+      if (userr) {
+        return res.status(409).json({
+          success: false,
+          message:'این شماره موبایل قبلاً ثبت شده است'
+        })
+      }
+
+      const hashedpassword=await bcrypt.hash(password,10)
+
+      const user=await usermodel.create({
+        name,
+        lastname,
+        phone,
+        password:hashedpassword,
+        verified:true
+      })
+
+      // await sms(password, user.phone)
+
+      const safeUser=user.toObject()
+      delete safeUser.password
+
+      return res.status(201).json({
+        success:true,
+        message:'کاربر اضافه شد',
+        user:safeUser
+      })
+    }
+
+  } catch(err){
+    console.log(err)
+
+    if (err.code===11000) {
+      return res.status(409).json({
         success:false,
         message:'این شماره موبایل قبلاً ثبت شده است'
+      })
+    }
+
+    return res.status(500).json({
+      success:false,
+      message:'server error'
     })
-}
-const hashedpassword=await bcrypt.hash(password,10)
-
-const user=await usermodel.create({
-name,
-lastname,
-phone,
-password:hashedpassword,
-verified:true
-})
-await sms(password,user.phone)
-return res.status(201).json({
-success:true,
-message:'کاربر اضافه شد',
-user
-})
-}
-
-}catch(err){
-    console.log(err)
-return res.status(500).json({
-success:false,
-message:'server error'
-})
-}
+  }
 }
