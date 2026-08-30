@@ -16,8 +16,7 @@ const user=await usermodel.findOneAndUpdate(
         password:""
     },
     $set:{
-        deleted:true,
-         verified:false
+        deleted:true
     }
 }
 )
@@ -31,7 +30,7 @@ return res.status(404).json({
 
 return res.status(200).json({
     success:true,
-    message:'حساب کاربری حذف شد'
+    message:'حساب کاربری بن شد'
 })
 
 }catch(err){

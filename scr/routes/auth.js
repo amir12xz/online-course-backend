@@ -12,18 +12,19 @@ const islogin=require('./../middlewares/checkabletologin')
 const changepasswordvalidator=require('./../validators/changepassword')
 const changepassword=require('./../controllers/changepassword')
 const checklogin=require('./../middlewares/islogin')
-const turnstile=require('./../middlewares/turnstile')
+const otpvalidator=require('./../validators/otpvalidator')
+// const turnstile=require('./../middlewares/turnstile')
 
 
-route.post('/register',islogin,turnstile,registerValidator,validator,register.Register,register.checkotp)
-route.post('/applyregister',islogin,register.applyregister)
+route.post('/register',islogin/*,turnstile*/,registerValidator,validator,register.Register,register.checkotp)
+route.post('/applyregister',islogin,otpvalidator,validator,register.applyregister)
 route.post('/register/otp-again',islogin,register.tryotpagain)
 
-route.post('/login',islogin,turnstile,loginValidator,validator,login)
+route.post('/login',islogin/*,turnstile*/,loginValidator,validator,login)
 
-route.post('/forgotpassword/enterphone',islogin,turnstile,forgotPhoneValidator,validator,forgotpassword.enterphone) 
+route.post('/forgotpassword/enterphone',islogin,forgotPhoneValidator,validator,forgotpassword.enterphone) 
 route.post('/forgotpassword/otpagain',islogin,forgotpassword.otpagain)
-route.post('/forgotpassword/entercode',islogin,forgotpassword.checkotp)
+route.post('/forgotpassword/entercode',islogin,otpvalidator,validator,forgotpassword.checkotp)
 
 
 route.post('/changepassword',checklogin,changepasswordvalidator,validator,changepassword)

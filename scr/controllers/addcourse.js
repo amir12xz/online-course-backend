@@ -60,11 +60,11 @@ course:editedcourse
 
 }else{
 
-if(!req.files?.thumbnail){
-return res.status(400).json({
-success:false,
-message:'تصویر دوره نیاز است'
-})
+if (!req.files?.thumbnail||!req.files?.introvideo) {
+    return res.status(400).json({
+        success:false,
+        message:'تصویر و ویدیوی دوره الزامی هستند'
+    })
 }
 
 

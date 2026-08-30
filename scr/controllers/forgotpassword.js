@@ -7,6 +7,23 @@ const sms=require('./../integrations/sms/forgotpassword')
 
 module.exports.enterphone = async (req, res) => {
     try{
+        const token=req.cookies.temptokenf
+
+if (token) {
+    try {
+        const payload=jwt.verify(token,process.env.JWT);
+
+        if (payload?.phone && payload?.otpVerified===false){
+            return res.status(409).json({
+                success:false,
+                message:'یک فرآیند بازیابی رمز عبور در حال انجام است'
+            })
+        }
+
+    }catch(err){
+        res.clearCookie('temptokenf')
+    }
+}
 
         const phone=req.body.phone
         const user=await usermodel.findOne({
@@ -48,7 +65,7 @@ module.exports.enterphone = async (req, res) => {
             }
         )
 
-        res.cookie("temptoken",temptoken, {
+        res.cookie("temptokenf",temptoken, {
             httpOnly:true
         })
 
@@ -71,8 +88,19 @@ module.exports.checkotp = async (req, res) => {
     try {
 
         const code =req.body.code
-        const token =req.cookies.temptoken
-        const data =jwt.verify(token, process.env.JWT)
+  const token = req.cookies.temptokenf;
+
+if (!token){
+        res.clearCookie('temptokenf',{
+        httpOnly: true
+        })
+    return res.status(401).json({
+        success:false,
+        message:'مدت زمان بازیابی رمز عبور به پایان رسیده است'
+    })
+}
+
+const data=jwt.verify(token, process.env.JWT)
 
         const otpcheck=await otpmodel.findOne({
             phone:data.phone,
@@ -105,7 +133,7 @@ module.exports.checkotp = async (req, res) => {
         otpcheck.used=true
         await otpcheck.save()
 
-            res.clearCookie('temptoken', {
+            res.clearCookie('temptokenf', {
                 httpOnly: true
             })
 
@@ -124,7 +152,7 @@ sameSite:'lax'
 
         return res.status(200).json({
             success:true,
-            message:"مجاز به وروذ"
+            message:"مجاز به ورود"
         })
 
     } catch (err) {
@@ -132,7 +160,7 @@ sameSite:'lax'
             err.name === 'JsonWebTokenError' ||
             err.name === 'TokenExpiredError'
         ) {
-            res.clearCookie('temptoken', {
+            res.clearCookie('temptokenf', {
                 httpOnly: true
             })
 
@@ -156,9 +184,18 @@ module.exports.otpagain = async (req, res) => {
 
     try {
 
-        const token = req.cookies.temptoken
+       const token=req.cookies.temptokenf
 
-        const payload = jwt.verify(token, process.env.JWT)
+if (!token){
+         res.clearCookie('temptokenf',{
+        httpOnly: true
+            })
+    return res.status(401).json({
+        success:false,
+        message:'مدت زمان بازیابی رمز عبور به پایان رسیده است'
+    })
+}
+const payload=jwt.verify(token, process.env.JWT)
 
         const otp = await otpmodel.findOne({
             phone: payload.phone,
@@ -188,27 +225,29 @@ module.exports.otpagain = async (req, res) => {
         // await sms(otpcode, payload.phone)
 
         return res.status(200).json({
-            success: true,
-            message: 'کد ارسال شد'
+            success:true,
+            message:'کد ارسال شد'
         })
 
     } catch (err) {
 
-        if (err.name === 'TokenExpiredError') {
+      if (
+    err.name==='TokenExpiredError'||
+    err.name==='JsonWebTokenError'
+) {
+    res.clearCookie('temptokenf',{
+        httpOnly:true
+    })
 
-            res.clearCookie('temptoken', {
-                httpOnly: true
-            })
-
-            return res.status(401).json({
-                success: false,
-                message: 'مدت زمان بازیابی رمز عبور به پایان رسیده است'
-            })
-        }
+    return res.status(401).json({
+        success:false,
+        message:'مدت زمان بازیابی رمز عبور به پایان رسیده است'
+    })
+}
 
         return res.status(401).json({
-            success: false,
-            message: err.message
+            success:false,
+            message:err.message
         })
     }
 }

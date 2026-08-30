@@ -7,16 +7,49 @@ const codemaker=require('./../utils/createotpcode')
 
 module.exports.Register=async(req,res,next)=>{
 try{
+    const token=req.cookies.temptoken;
+
+if (token){
+    try {
+        const payload=jwt.verify(token, process.env.JWT);
+
+        if (payload?.phone) {
+            return res.status(409).json({
+                success:false,
+                message:'یک فرآیند ثبت نام در حال انجام است'
+            })
+        }
+
+    }catch(err){
+
+        if(err.name==='TokenExpiredError'){
+            
+            res.clearCookie('temptoken')
+        }else{
+         
+            res.clearCookie('temptoken')
+        }
+    }
+}
+
 const {name,lastname,phone,password}=req.body
 
 const check_phone=await usermodel.findOne({phone})
 const hashed_pass=await bcrypt.hash(password,10)
 const checkotp=await otpmodel.findOne({phone,used:false})
 
+
 if(checkotp)
    return res.status(409).json({
 success:false,
 message:'کد قبلا ارسال شده'})
+
+if (check_phone?.deleted) {
+    return res.status(409).json({
+        success: false,
+        message:'این شماره تلفن در این سایت مسدود شده است'
+    })
+}
 
 
 if (check_phone) {
@@ -184,7 +217,7 @@ message:'ثبت نام تکمیل شد'
 
 }catch(err){
 
-    if (err.name==='TokenExpiredError') {
+    if (err.name==='TokenExpiredError'||err.name==='JsonWebTokenError'){
 
         res.clearCookie('temptoken', {
             httpOnly:true
@@ -208,10 +241,14 @@ try{
 
 const token=req.cookies.temptoken
         if (!token) {
+            res.clearCookie('temptoken', {
+            httpOnly:true
+        })
             return res.status(401).json({
                 success: false,
                 message: 'مهلت ثبت نام به اتمام رسیده است'
             })
+            
         }
 const payload=jwt.verify(token,process.env.JWT)
 
@@ -249,15 +286,19 @@ message:'کد ارسال شد'
 
 }catch(err){
 
-    if (err.name === 'TokenExpiredError') {
-        res.clearCookie('temptoken', {
-        httpOnly: true
+if (
+    err.name==='TokenExpiredError'||
+    err.name==='JsonWebTokenError'
+) {
+    res.clearCookie('temptoken',{
+        httpOnly:true
     })
-        return res.status(401).json({
-            success: false,
-            message: 'مدت ثبت نام به پایان رسیده است'
-        })
-    }
+
+    return res.status(401).json({
+        success:false,
+        message:'مدت ثبت نام به پایان رسیده است'
+    })
+}
 
 return res.status(401).json({
 success:false,

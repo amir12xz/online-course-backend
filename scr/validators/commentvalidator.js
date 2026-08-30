@@ -18,13 +18,11 @@ module.exports = [
         .notEmpty()
         .withMessage('متن کامنت را وارد کنید')
         .bail()
-
-        .isLength({
-            min: 3,
-            max: 2000
-        })
-        .withMessage('متن کامنت باید بین ۳ تا ۲۰۰۰ کاراکتر باشد')
+        
+        .isLength({ max: 1000 })
+        .withMessage('متن کامنت نمی‌تواند بیشتر از ۱۰۰۰ کاراکتر باشد')
         .bail()
+ 
 
         .escape()
 ]

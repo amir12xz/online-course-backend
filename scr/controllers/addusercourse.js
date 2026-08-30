@@ -44,7 +44,7 @@ message:'کاربر قبلا در این دوره ثبت نام شده'})
 
 if(checkenrollment?.status=='pending')
     return res.status(409).json({
-        success:true,
+        success:false,
         message:'ثبت نام این کاربر ناقص است از پنل ثبت نام ناقص اقدام به ثبت نام کنید'
     })
 

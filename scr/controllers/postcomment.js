@@ -34,6 +34,21 @@ const user=await usermodel.findOne({
             })
         }
 
+        const startOfDay = new Date()
+        startOfDay.setHours(0, 0, 0, 0)
+
+        const checkcomment=await commentmodel.findOne({
+            user:user._id,
+            course:course._id,
+            createdAt:{$gte:startOfDay}
+        })
+        if(checkcomment){
+            return res.status(429).json({
+            success:false,
+            message:'شما امروز برای این دوره قبلاً کامنت گذاشته‌اید'
+  })
+        }
+
         await commentmodel.create({
             user:user._id,
             course:course._id,

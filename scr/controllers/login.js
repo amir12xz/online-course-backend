@@ -9,17 +9,29 @@ const loginhistorymodel=require('./../models/loginhistory')
 module.exports=async(req,res)=>{
 try{
 const {phone,password}=req.body
-console.log(req.body);
-console.log(req.body.role);
-console.log(Object.prototype.role);
 
-const user=await usermodel.findOne({phone,verified:true,deleted:false})
+
+const user=await usermodel.findOne({phone})
 
 if(!user)
     return res.status(401).json({
         success:false,
         message:'شماره موبایل یا رمز عبور اشتباه است'
     })
+
+if (user?.deleted){
+    return res.status(403).json({
+        success:false,
+        message:'حساب کاربری شما مسدود شده است'
+    })
+}
+
+if (!user.verified) {
+    return res.status(401).json({
+        success: false,
+        message: 'شماره موبایل یا رمز عبور اشتباه است'
+    })
+}
 
 const checkpass=await bcrypt.compare(password, user.password)
 
