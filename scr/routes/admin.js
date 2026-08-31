@@ -24,6 +24,7 @@ const finduserbyphone=require('./../controllers/getuserbyphone')
 const addusercourse=require('./../controllers/addusercourse')
 const adduserval=require('./../validators/adduseradmin')
 const edituserval=require('./../validators/edituseradmin')
+const unban=require('./../controllers/unban')
 
 route.post('/addcourse/:courseid?',isadmin,checkid('courseid'),courseupload.fields([
 {name:'thumbnail',maxCount:1},
@@ -32,6 +33,7 @@ route.post('/addcourse/:courseid?',isadmin,checkid('courseid'),courseupload.fiel
 route.post('/adduser/:userid',isadmin,checkid('userid'),edituserval,validator,adduser)
 route.post('/adduser',isadmin,adduserval,validator,adduser)
 route.post('/deleteuser/:id',isadmin,checkid('id'),deleteacount)
+route.post('/unban/:id',isadmin,checkid('id'),unban)
 route.post('/replycomment/:id',isadmin,checkid('id'),replycomment)
 route.post('/deletecomment/:id',isadmin,checkid('id'),deletecomment)
 route.post('/confirmenrollment/:enrollmentid',isadmin,checkid('enrollmentid'),confirmenrollment)
