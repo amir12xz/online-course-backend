@@ -10,11 +10,6 @@ const user=await usermodel.findOneAndUpdate(
     verified:true
 },
 {
-    $unset:{
-        name:"",
-        lastname:"",
-        password:""
-    },
     $set:{
         deleted:true
     }

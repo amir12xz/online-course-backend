@@ -9,8 +9,7 @@ const limit=100
 const skip=(page-1)*limit
 
 const filter={
-verified:true,
-deleted:false
+verified:true
 }
 
 if(key){
