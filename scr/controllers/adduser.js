@@ -1,3 +1,4 @@
+const jwt=require('jsonwebtoken')
 const usermodel=require('./../models/user')
 const bcrypt=require('bcrypt')
 const sms=require('./../integrations/sms/passwordsms')
@@ -6,6 +7,8 @@ module.exports=async(req,res)=>{
   try {
     const {name,lastname,phone,password,role}=req.body
     const userid=req.params.userid
+    const token=req.cookies.token
+    const decode=jwt.verify(token,process.env.JWT)
 
     if (userid){
       const existing=await usermodel.findOne({phone,_id:{$ne:userid}})
@@ -16,8 +19,14 @@ module.exports=async(req,res)=>{
         })
       }
 
-      const updatedata={ name,lastname,phone,role}
+      const checkroll=await usermodel.findById(userid)
 
+      if(userid==decode.id&&checkroll.role=='admin')
+      return res.status(409).json({
+      success:false,
+      message:'نمی توان نقش این کاربر را تغییر داد'})
+
+      const updatedata={ name,lastname,phone,role}
       const user=await usermodel.findByIdAndUpdate(userid,updatedata,{new:true})
 
       if (!user){

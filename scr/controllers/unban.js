@@ -2,7 +2,7 @@ const usermodel=require('./../models/user')
 
 module.exports=async(req,res)=>{
     try{
-    const {userid}=req.params.id
+    const userid=req.params.id
     const user=await usermodel.findOne({_id:userid,verified:true})
    
     if(!user)

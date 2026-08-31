@@ -6,8 +6,7 @@ module.exports=async(req, res)=>{
 
     const user=await usermodel.findOne({
       _id: userid,
-      verified:true,
-      deleted:false
+      verified:true 
     }).select('name lastname phone role')
 
     if (!user){
