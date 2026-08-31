@@ -1,51 +1,60 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose')
 
+const transactionSchema = new mongoose.Schema({
 
-const transactionSchema=new mongoose.Schema({
-
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'user',
-        required:true
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
     },
 
-    course:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'course',
-        required:true
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'course',
+        required: true
     },
 
-    amount:{
-        type:Number,
-        required:true
+    amount: {
+        type: Number,
+        required: true
     },
 
-    status:{
-        type:String,
-        enum:[
+    status: {
+        type: String,
+        enum: [
             'pending',
             'success',
-            'failed'
+            'failed',
+            'expired'
         ],
-        default:'pending'
+        default: 'pending'
     },
 
-    authority:{//ایدی پرداخت 
-        type:String,
-        unique:true,
-        sparse:true
+    authority: {
+        type: String,
+        unique: true,
+        sparse: true
     },
 
-    refId:{
-        type:String
+    refId: {
+        type: String
     }
 
-},{
-    timestamps:true
+}, {
+    timestamps: true
 })
 
+transactionSchema.index(
+    { user: 1, course: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            status: 'pending'
+        }
+    }
+)
 
-module.exports=mongoose.model(
-'transaction',
-transactionSchema
+module.exports = mongoose.model(
+    'transaction',
+    transactionSchema
 )

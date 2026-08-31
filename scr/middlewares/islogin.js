@@ -1,17 +1,31 @@
 const jwt=require('jsonwebtoken')
+const usermodel=require('./../models/user')
 
-module.exports=(req,res,next)=>{
+module.exports=async(req,res,next)=>{
 try{
 const token=req.cookies.token
-if(!token)
+const decode=jwt.verify(token,process.env.JWT)
+const user=await usermodel.findOne({_id:decode.id,verified:true})
+
+if(!user)
 return res.status(401).json({
 success:false,
 message:'لطفا وارد شوید'
 })
 
-const decode=jwt.verify(token,process.env.JWT)
+if(user.deleted){
+        res.clearCookie('token',{
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax'
+    })
 
- 
+    return res.status(409).json({
+        success:false,
+        message:'اکانت شما مسدود شد'
+    })
+}
+
 
 return next()
 
