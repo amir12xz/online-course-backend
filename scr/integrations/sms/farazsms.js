@@ -19,7 +19,10 @@ return axios.post(
     {
        headers:{
           "Api-Key":process.env.FARAZ_API
-       }
+       },
+            timeout:20000
     }
 )
 }
+
+module.exports=sms

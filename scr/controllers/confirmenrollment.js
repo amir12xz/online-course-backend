@@ -12,24 +12,30 @@ const enrollment=await enrollmentmodel.findById(enrollmentid)
 
 if(enrollment){
 
-if(enrollment.status==='success'){
-return res.status(409).json({
-success:false,
-message:'کاربر قبلا  ثبت نام شده است'
-})
-}
-if (!enrollment.user || !enrollment.course) {
+if (!enrollment.user||!enrollment.course) {
     return res.status(404).json({
         success: false,
         message: 'کاربر یا دوره پیدا نشد'
     })
 }
 
-if(enrollment.plicencs)
-        return res.status(404).json({
-        success: false,
-        message:'لایسنس وجود دارد '
-    })
+if(enrollment.status==='success'&&enrollment.plicencs){
+return res.status(409).json({
+success:false,
+message:'کاربر قبلا  ثبت نام شده است'
+})
+}
+
+if(enrollment.status==='pending'&&enrollment.plicencs){
+    enrollment.status='success'
+    await enrollment.save()
+
+    return res.status(200).json({
+success:true,
+message:'ثبت نام دوره موفقیت آمیز بود'
+})
+
+}
 
 let license=await spotplayer(
 enrollment.user.name,
@@ -37,7 +43,7 @@ enrollment.course.spotplayercourseid,
 enrollment.user.phone
 )
 
-if(license.key){
+if(license&&license.key){
 
 enrollment.plicencs=license.key
 enrollment.status='success'
@@ -66,8 +72,6 @@ message:'ثبت نام ناقصی پیدا نشد'
 })
 
 }catch(err){
-
-console.log(err)
 
 return res.status(500).json({
 success:false,

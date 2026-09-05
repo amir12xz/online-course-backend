@@ -21,7 +21,8 @@ headers:{
 '$API':process.env.SPOTID,
 '$LEVEL':'-1',
 'Content-Type':'application/json'
-}
+},
+            timeout:20000
 }
 )
 

@@ -21,7 +21,7 @@ required: true
 used:{
 type:Boolean,
 default:false
-}
+} 
 })
 
 schema.index({expiredAt:1},{expireAfterSeconds:0})

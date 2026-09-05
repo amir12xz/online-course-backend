@@ -1,24 +1,33 @@
-const transactionmodel = require('./../models/transaction')
+const transactionmodel=require('./../models/transaction')
 
-module.exports = async (req, res) => {
-    try {
+module.exports=async(req,res)=>{
+    try{
+        const now=new Date()
 
-        const now = new Date()
+        const tehranDate=new Intl.DateTimeFormat('en-CA',{
+            timeZone:'Asia/Tehran',
+            year:'numeric',
+            month:'2-digit',
+            day:'2-digit'
+        }).format(now)
 
-        const starttoday = new Date(now)
-        starttoday.setHours(0, 0, 0, 0)
+        const [year,month,day]=tehranDate.split('-').map(Number)
 
-        const start7days = new Date(now)
-        start7days.setDate(start7days.getDate() - 7)
+        const starttoday=new Date(
+            `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:30`
+        )
 
-        const start30days = new Date(now)
-        start30days.setDate(start30days.getDate() - 30)
+        const start7days=new Date(starttoday)
+        start7days.setDate(start7days.getDate()-7)
 
-        const startyear = new Date(now)
-        startyear.setDate(startyear.getDate() - 365)
+        const start30days=new Date(starttoday)
+        start30days.setDate(start30days.getDate()-30)
 
-        const filter = {
-            status: 'success'
+        const startyear=new Date(starttoday)
+        startyear.setDate(startyear.getDate()-365)
+
+        const filter={
+            status:'success'
         }
 
         const [
@@ -27,104 +36,123 @@ module.exports = async (req, res) => {
             last30days,
             lastyear,
             total
-        ] = await Promise.all([
-
+        ]=await Promise.all([
             transactionmodel.aggregate([
                 {
-                    $match: {
+                    $match:{
                         ...filter,
-                        createdAt: { $gte: starttoday }
+                        createdAt:{
+                            $gte:starttoday
+                        }
                     }
                 },
                 {
-                    $group: {
-                        _id: null,
-                        count: { $sum: 1 },
-                        amount: { $sum: '$amount' }
+                    $group:{
+                        _id:null,
+                        count:{
+                            $sum:1
+                        },
+                        amount:{
+                            $sum:'$amount'
+                        }
                     }
                 }
             ]),
-
             transactionmodel.aggregate([
                 {
-                    $match: {
+                    $match:{
                         ...filter,
-                        createdAt: { $gte: start7days }
+                        createdAt:{
+                            $gte:start7days
+                        }
                     }
                 },
                 {
-                    $group: {
-                        _id: null,
-                        count: { $sum: 1 },
-                        amount: { $sum: '$amount' }
+                    $group:{
+                        _id:null,
+                        count:{
+                            $sum:1
+                        },
+                        amount:{
+                            $sum:'$amount'
+                        }
                     }
                 }
             ]),
-
             transactionmodel.aggregate([
                 {
-                    $match: {
+                    $match:{
                         ...filter,
-                        createdAt: { $gte: start30days }
+                        createdAt:{
+                            $gte:start30days
+                        }
                     }
                 },
                 {
-                    $group: {
-                        _id: null,
-                        count: { $sum: 1 },
-                        amount: { $sum: '$amount' }
+                    $group:{
+                        _id:null,
+                        count:{
+                            $sum:1
+                        },
+                        amount:{
+                            $sum:'$amount'
+                        }
                     }
                 }
             ]),
-
             transactionmodel.aggregate([
                 {
-                    $match: {
+                    $match:{
                         ...filter,
-                        createdAt: { $gte: startyear }
+                        createdAt:{
+                            $gte:startyear
+                        }
                     }
                 },
                 {
-                    $group: {
-                        _id: null,
-                        count: { $sum: 1 },
-                        amount: { $sum: '$amount' }
+                    $group:{
+                        _id:null,
+                        count:{
+                            $sum:1
+                        },
+                        amount:{
+                            $sum:'$amount'
+                        }
                     }
                 }
             ]),
-
             transactionmodel.aggregate([
                 {
-                    $match: filter
+                    $match:filter
                 },
                 {
-                    $group: {
-                        _id: null,
-                        count: { $sum: 1 },
-                        amount: { $sum: '$amount' }
+                    $group:{
+                        _id:null,
+                        count:{
+                            $sum:1
+                        },
+                        amount:{
+                            $sum:'$amount'
+                        }
                     }
                 }
             ])
         ])
 
         return res.status(200).json({
-            success: true,
-
-            data: {
-                today: today[0] || { count: 0, amount: 0 },
-                last7days: last7days[0] || { count: 0, amount: 0 },
-                last30days: last30days[0] || { count: 0, amount: 0 },
-                lastyear: lastyear[0] || { count: 0, amount: 0 },
-                total: total[0] || { count: 0, amount: 0 }
+            success:true,
+            data:{
+                today:today[0]||{count:0,amount:0},
+                last7days:last7days[0]||{count:0,amount:0},
+                last30days:last30days[0]||{count:0,amount:0},
+                lastyear:lastyear[0]||{count:0,amount:0},
+                total:total[0]||{count:0,amount:0}
             }
         })
-
-    } catch (err) {
-
+    }catch(err){
         return res.status(500).json({
-            success: false,
-            message: err.message
+            success:false,
+            message:err.message
         })
-
     }
 }

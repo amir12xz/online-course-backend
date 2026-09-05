@@ -4,12 +4,10 @@ const route=express.Router()
 const checklog=require('./../middlewares/islogin')
 const userdata=require('./../controllers/userdata')
 const logout=require('../controllers/logout')
-const showcourselesson=require('./../controllers/showcourseprofile')
 const userprofile=require('./../controllers/profile')
 
 route.get('/showprofile',checklog,userdata)
 route.get('/logout',checklog,logout)
-route.get('/showcourse',checklog,showcourselesson)//del
 route.get('/me',checklog,userprofile)
 
 

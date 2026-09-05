@@ -1,22 +1,30 @@
-const loginhistorymodel = require('./../models/loginhistory')
+const loginhistorymodel=require('./../models/loginhistory')
 
-module.exports = async (req, res) => {
-    try {
-
+module.exports=async(req,res)=>{
+    try{
         const now=new Date()
 
-        const starttoday=new Date(now)
-        starttoday.setHours(0, 0, 0, 0)
+        const tehranDate=new Intl.DateTimeFormat('en-CA',{
+            timeZone:'Asia/Tehran',
+            year:'numeric',
+            month:'2-digit',
+            day:'2-digit'
+        }).format(now)
 
-        const start7day=new Date(now)
+        const [year,month,day]=tehranDate.split('-').map(Number)
+
+        const starttoday=new Date(
+            `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:30`
+        )
+
+        const start7day=new Date(starttoday)
         start7day.setDate(start7day.getDate()-7)
 
-        const start30day= new Date(now)
+        const start30day=new Date(starttoday)
         start30day.setDate(start30day.getDate()-30)
 
-        const startyear=new Date(now)
+        const startyear=new Date(starttoday)
         startyear.setDate(startyear.getDate()-365)
-
 
         const [
             today,
@@ -24,30 +32,25 @@ module.exports = async (req, res) => {
             last30Days,
             lastYear,
             total
-        ] = await Promise.all([
-
+        ]=await Promise.all([
             loginhistorymodel.countDocuments({
-                createdAt:{ $gte:starttoday}
+                createdAt:{$gte:starttoday}
             }),
-
             loginhistorymodel.countDocuments({
                 createdAt:{$gte:start7day}
             }),
-
             loginhistorymodel.countDocuments({
                 createdAt:{$gte:start30day}
             }),
-
             loginhistorymodel.countDocuments({
                 createdAt:{$gte:startyear}
             }),
-
             loginhistorymodel.countDocuments()
         ])
 
         return res.status(200).json({
-            success: true,
-            data: {
+            success:true,
+            data:{
                 today,
                 last7Days,
                 last30Days,
@@ -55,13 +58,10 @@ module.exports = async (req, res) => {
                 total
             }
         })
-
-    } catch (err) {
-
+    }catch(err){
         return res.status(500).json({
-            success: false,
-            message: err.message
+            success:false,
+            message:err.message
         })
-
     }
 }

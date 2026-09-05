@@ -21,7 +21,7 @@ module.exports=async(req,res)=>{
 
       const checkroll=await usermodel.findById(userid)
 
-      if(userid==decode.id&&checkroll.role=='admin')
+      if(userid==decode.id&&checkroll?.role=='admin')
       return res.status(409).json({
       success:false,
       message:'نمی توان نقش این کاربر را تغییر داد'})

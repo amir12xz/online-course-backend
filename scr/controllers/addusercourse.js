@@ -6,7 +6,7 @@ const spot=require('../integrations/spotplayer/spot')
 module.exports=async(req,res)=>{
 try{
     const {courseId,userId}=req.params
-    const user=await usermodel.findById(userId)
+    const user=await usermodel.findOne({_id:userId,deleted:false,verified:true})
     const course=await coursemodel.findById(courseId)
 
     if(!user)

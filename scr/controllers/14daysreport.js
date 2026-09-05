@@ -1,96 +1,93 @@
-const transactionmodel = require('./../models/transaction')
+const transactionmodel=require('./../models/transaction')
 
-module.exports = async (req, res) => {
-    try {
+module.exports=async(req,res)=>{
+    try{
+        const now=new Date()
 
-        const today = new Date()
+        const tehranDate=new Intl.DateTimeFormat('en-CA',{
+            timeZone:'Asia/Tehran',
+            year:'numeric',
+            month:'2-digit',
+            day:'2-digit'
+        }).format(now)
 
-        const tehranDate = new Intl.DateTimeFormat('en-CA', {
-            timeZone: 'Asia/Tehran',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).format(today)
+        const [year,month,day] = tehranDate.split('-').map(Number)
 
-        const [year, month, day] = tehranDate.split('-').map(Number)
+        
+        const todayTehran=new Date(
+            `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T00:00:00+03:30`
+        )
 
-        const todayTehran = new Date(Date.UTC(year, month - 1, day))
+        const startdate=new Date(todayTehran)
+        startdate.setDate(startdate.getDate()-13)
 
-        const startdate = new Date(todayTehran)
-        startdate.setUTCDate(startdate.getUTCDate() - 13)
+        const enddate=new Date(todayTehran)
+        enddate.setDate(enddate.getDate()+1)
 
-        const enddate = new Date(todayTehran)
-        enddate.setUTCDate(enddate.getUTCDate() + 1)
-
-        const sales = await transactionmodel.aggregate([
-
+        const sales=await transactionmodel.aggregate([
             {
-                $match: {
-                    status: 'success',
-                    createdAt: {
-                        $gte: startdate,
-                        $lt: enddate
+                $match:{
+                    status:'success',
+                    createdAt:{
+                        $gte:startdate,
+                        $lt:enddate
                     }
                 }
             },
-
             {
-                $group: {
-                    _id: {
-                        $dateToString: {
-                            format: '%Y-%m-%d',
-                            date: '$createdAt',
-                            timezone: 'Asia/Tehran'
+                $group:{
+                    _id:{
+                        $dateToString:{
+                            format:'%Y-%m-%d',
+                            date:'$createdAt',
+                            timezone:'Asia/Tehran'
                         }
                     },
-
-                    sales: {
-                        $sum: 1
-                        },
-                        amount:{
+                    sales:{
+                        $sum:1
+                    },
+                    amount:{
                         $sum:'$amount'
-                        }
+                    }
                 }
             },
-
             {
-                $sort: {
-                    _id: 1
+                $sort:{
+                    _id:1
                 }
             }
-
         ])
 
-        const result = []
+        const result=[]
 
-        for (let i = 0; i < 14; i++) {
+        for (let i=0;i<14;i++){
 
-            const date = new Date(startdate)
+            const date=new Date(startdate)
+            date.setDate(date.getDate()+i)
 
-            date.setUTCDate(date.getUTCDate() + i)
+            const datestring=new Intl.DateTimeFormat('en-CA',{
+                timeZone:'Asia/Tehran'
+            }).format(date)
 
-            const datestring = date.toISOString().split('T')[0]
+            const found=sales.find(item =>item._id===datestring)
 
-            const found = sales.find(item => item._id === datestring)
-
-result.push({
-    date: datestring,
-    sales:found?found.sales:0,
-    amount:found?found.amount:0
-})
+            result.push({
+                date: datestring,
+                sales:found?found.sales:0,
+                amount:found?found.amount:0
+            })
         }
 
         return res.status(200).json({
-            success: true,
-            data: result
+            success:true,
+            data:result
         })
 
-    } catch (err) {
+    } catch(err){
 
         return res.status(500).json({
-            success: false,
-            message: err.message
+            success:false,
+            message:err.message
         })
-
     }
 }

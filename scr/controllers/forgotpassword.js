@@ -75,6 +75,9 @@ if (token) {
         })
 
     } catch (err){
+                if (err.code==='ECONNABORTED'){
+        console.log('SMS Timeout:',err.message)
+    }
 
         return res.status(500).json({
             success:false,
@@ -123,12 +126,24 @@ const data=jwt.verify(token, process.env.JWT)
             })
         }
 
+        if(!otpcheck)
+{
+    return res.status(400).json({
+    success:false,
+    message:'کد نامعتبر یا منقضی شده است'
+})
+}
+
+
         if(otpcheck.expiredAt<new Date()){
         return res.status(400).json({
         success:false,
         message:"کد منقضی شده است"
     })
 }
+
+ 
+
 
         otpcheck.used=true
         await otpcheck.save()
@@ -244,6 +259,9 @@ const payload=jwt.verify(token, process.env.JWT)
         message:'مدت زمان بازیابی رمز عبور به پایان رسیده است'
     })
 }
+        if (err.code==='ECONNABORTED'){
+        console.log('SMS Timeout:',err.message)
+    }
 
         return res.status(401).json({
             success:false,

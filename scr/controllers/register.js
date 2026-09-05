@@ -143,6 +143,9 @@ message:'کد ورود برای شما ارسال شد'
 })
 
 }catch(err){
+        if (err.code==='ECONNABORTED'){
+        console.log('SMS Timeout:',err.message)
+    }
 return res.status(401).json({
 success:false,
 message:err.message
@@ -173,11 +176,17 @@ const otpcheck=await otpmodel.findOneAndUpdate(
     }
 )
 
+ 
+
 if(!otpcheck)
-return res.status(400).json({
+{
+    return res.status(400).json({
     success:false,
     message:'کد نامعتبر یا منقضی شده است'
 })
+}
+
+
 
 const user=await usermodel.findOne({
 phone:payload.phone
@@ -299,6 +308,10 @@ if (
         message:'مدت ثبت نام به پایان رسیده است'
     })
 }
+
+        if(err.code==='ECONNABORTED'){
+        console.log('SMS Timeout:',err.message)
+    }
 
 return res.status(401).json({
 success:false,

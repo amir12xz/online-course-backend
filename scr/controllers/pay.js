@@ -86,17 +86,17 @@ module.exports=async(req, res)=>{
 
         if (pendingTransaction) {
 
-            const thirtyMinutes=
-                30*60*1000
+            const twntyMinutes=
+                20*60*1000
 
             const transactionAge =
                 Date.now()-pendingTransaction.createdAt.getTime()
 
-            if (transactionAge<thirtyMinutes) {
+            if (transactionAge<twntyMinutes) {
 
                 return res.status(409).json({
                     success:false,
-                    message:'برای پرداخت بعدی باید 30 دقیقه صبر کنید'
+                    message:'برای پرداخت بعدی باید 20 دقیقه صبر کنید'
                 })
             }
 
@@ -137,10 +137,23 @@ module.exports=async(req, res)=>{
                 `${process.env.ZARINPALCALLBACK}?Redirect=${encodeURIComponent(Redirect)}`
         }
 
-        const response=await axios.post(
-            'https://sandbox.zarinpal.com/pg/v4/payment/request.json',
-            orderdata
-        )
+let response
+
+try{
+    response=await axios.post(
+        'https://sandbox.zarinpal.com/pg/v4/payment/request.json',
+        orderdata
+    )
+
+}catch(err){
+    transaction.status='failed'
+    await transaction.save()
+
+    return res.status(502).json({
+        success:false,
+        message:'ارتباط با درگاه پرداخت ناموفق بود'
+    })
+}
 
         const data=response.data.data
 

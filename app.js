@@ -36,16 +36,16 @@ app.use(cors({
 }))
 app.use(express.static(path.join(__dirname,'scr','public')))
 
-const limiter = ratelimit({
-  windowMs:15*60*1000,  
-  max:100,                 
-  message:{
-    success:false,
-    message:'درخواست بیش از حد'
-  }
-})
+// const limiter = ratelimit({
+//   windowMs:15*60*1000,  
+//   max:100,                 
+//   message:{
+//     success:false,
+//     message:'درخواست بیش از حد'
+//   }
+// })
 
-app.use('/api',limiter)
+// app.use('/api',limiter)
 
 
 app.use(express.json({limit:'10kb',strict:true})) 
