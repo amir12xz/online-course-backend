@@ -21,16 +21,6 @@ try{
             message:'دوره پیدا نشد'
         })
 
-//     const spotplayer=await spotplayer(
-//          user.name,
-//          course.spotplayercourseid,
-//         user.phone
-// )
-
-// if(!spotplayer||!spotplayer.key)
-//     return res.status(504).json({
-// success:false,
-// message:'اسپات پلیر جواب نداد'})
 const checkenrollment=await enrollmentmodel.findOne({
     user:user._id,
     course:course._id
@@ -41,12 +31,23 @@ if(checkenrollment?.status=='success')
 success:false,
 message:'کاربر قبلا در این دوره ثبت نام شده'})
 
+//     const spotplayer=await spotplayer(
+//          user.name,
+//          course.spotplayercourseid,
+//         user.phone
+// )
 
-if(checkenrollment?.status=='pending')
-    return res.status(409).json({
-        success:false,
-        message:'ثبت نام این کاربر ناقص است از پنل ثبت نام ناقص اقدام به ثبت نام کنید'
-    })
+// if(!spotplayer||!spotplayer.key)
+//     return res.status(504).json({
+// success:false,
+// message:'اسپات پلیر جواب نداد'})
+
+
+// if(checkenrollment?.status=='pending')
+//     return res.status(409).json({
+//         success:false,
+//         message:'ثبت نام این کاربر ناقص است از پنل ثبت نام ناقص اقدام به ثبت نام کنید'
+//     })
 
 
 

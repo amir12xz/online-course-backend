@@ -26,13 +26,13 @@ module.exports=async(req,res)=>{
 
         const sales=await transactionmodel.aggregate([
             {
-                $match:{
-                    status:'success',
-                    createdAt:{
-                        $gte:startdate,
-                        $lt:enddate
-                    }
-                }
+                $match: {
+        status: 'approved',
+        createdAt: {
+            $gte: startdate,
+            $lt: enddate
+        }
+    }
             },
             {
                 $group:{

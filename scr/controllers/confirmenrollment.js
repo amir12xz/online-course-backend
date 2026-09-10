@@ -1,82 +1,134 @@
-const enrollmentmodel=require('./../models/enrollment')
-const spotplayer=require('./../integrations/spotplayer/spot')
+const transactionmodel = require('./../models/transaction')
+const applyreceip = require('./../integrations/sms/applyreceipt')
 
-module.exports=async(req,res)=>{
-try{
+module.exports = async (req, res) => {
+    try {
+        const enrollmentid=req.params.enrollmentid
+        const receipt=await transactionmodel.findById(enrollmentid)
+            .populate('user','name phone')
+            .populate('course','title')
+        if (!receipt){
+            return res.status(404).json({
+                success: false,
+                message: 'رسید پیدا نشد'
+            })
+        }
 
-const enrollmentid=req.params.enrollmentid
+        if (!receipt.user||!receipt.course) {
+            return res.status(404).json({
+                success:false,
+                message:'کاربر یا دوره پیدا نشد'
+            })
+        }
 
-const enrollment=await enrollmentmodel.findById(enrollmentid)
-.populate('user','name phone')
-.populate('course','spotplayercourseid')
+        if (receipt.status!=='pending') {
+            return res.status(409).json({
+                success:false,
+                message:'این رسید قبلا بررسی شده است'
+            })
+        }
+        receipt.status='approved'
+        await receipt.save()
 
-if(enrollment){
+        await applyreceip(
+            receipt.user.name,
+            receipt.user.phone,
+            receipt.course.title
+        )
 
-if (!enrollment.user||!enrollment.course) {
-    return res.status(404).json({
-        success: false,
-        message: 'کاربر یا دوره پیدا نشد'
-    })
+        return res.status(200).json({
+            success:true,
+            message:'رسید با موفقیت تایید شد'
+        })
+    }catch(err){
+        return res.status(500).json({
+            success:false,
+            message:'server error'
+        })
+    }
 }
 
-if(enrollment.status==='success'&&enrollment.plicencs){
-return res.status(409).json({
-success:false,
-message:'کاربر قبلا  ثبت نام شده است'
-})
-}
 
-if(enrollment.status==='pending'&&enrollment.plicencs){
-    enrollment.status='success'
-    await enrollment.save()
+// const enrollmentmodel=require('./../models/enrollment')
+// const applyreceip=require('./../integrations/sms/applyreceipt')
+//const spotplayer=require('./../integrations/spotplayer/spot')
 
-    return res.status(200).json({
-success:true,
-message:'ثبت نام دوره موفقیت آمیز بود'
-})
+// module.exports=async(req,res)=>{
+// try{
 
-}
+// const enrollmentid=req.params.enrollmentid
 
-let license=await spotplayer(
-enrollment.user.name,
-enrollment.course.spotplayercourseid,
-enrollment.user.phone
-)
+// const enrollment=await enrollmentmodel.findById(enrollmentid)
+// .populate('user','name phone')
+// .populate('course','spotplayercourseid')
 
-if(license&&license.key){
+// if(enrollment){
 
-enrollment.plicencs=license.key
-enrollment.status='success'
+// if (!enrollment.user||!enrollment.course) {
+//     return res.status(404).json({
+//         success: false,
+//         message: 'کاربر یا دوره پیدا نشد'
+//     })
+// }
 
-await enrollment.save()
+// if(enrollment.status==='success'&&enrollment.plicencs){
+// return res.status(409).json({
+// success:false,
+// message:'کاربر قبلا  ثبت نام شده است'
+// })
+// }
 
-return res.status(200).json({
-success:true,
-message:'ثبت نام دوره موفقیت آمیز بود'
-})
+// if(enrollment.status==='pending'&&enrollment.plicencs){
+//     enrollment.status='success'
+//     await enrollment.save()
 
-}else{
+//     return res.status(200).json({
+// success:true,
+// message:'ثبت نام دوره موفقیت آمیز بود'
+// })
 
-return res.status(502).json({
-success:false,
-message:'مشکل اسپات پلیر'
-})
+// }
 
-}
+// let license=await spotplayer(
+// enrollment.user.name,
+// enrollment.course.spotplayercourseid,
+// enrollment.user.phone
+// )
 
-}
+// if(license&&license.key){
 
-return res.status(404).json({
-success:false,
-message:'ثبت نام ناقصی پیدا نشد'
-})
+// enrollment.plicencs=license.key
+// enrollment.status='success'
 
-}catch(err){
+// await enrollment.save()
 
-return res.status(500).json({
-success:false,
-message:'server error'
-})
+// return res.status(200).json({
+// success:true,
+// message:'ثبت نام دوره موفقیت آمیز بود'
+// })
 
-}
-}
+// }else{
+
+// return res.status(502).json({
+// success:false,
+// message:'مشکل اسپات پلیر'
+// })
+
+// }
+
+// }
+
+// return res.status(404).json({
+// success:false,
+// message:'ثبت نام ناقصی پیدا نشد'
+// })
+
+// }catch(err){
+
+// return res.status(500).json({
+// success:false,
+// message:'server error'
+// })
+
+// }
+// }

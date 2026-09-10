@@ -36,17 +36,14 @@ app.use(cors({
 }))
 app.use(express.static(path.join(__dirname,'scr','public')))
 
-// const limiter = ratelimit({
-//   windowMs:15*60*1000,  
-//   max:100,                 
-//   message:{
-//     success:false,
-//     message:'درخواست بیش از حد'
-//   }
-// })
-
-// app.use('/api',limiter)
-
+const limiter=ratelimit({
+  windowMs:15*60*1000,
+  max:120,
+  message:{
+    success:false,
+    message:"درخواست بیش از حد مجاز"
+  }
+})
 
 app.use(express.json({limit:'10kb',strict:true})) 
 app.use((err, req, res, next) => {
@@ -65,9 +62,9 @@ app.use(cookieparser())
 
 //route
 
-app.use('/api/profile',profile)
-app.use('/api/auth',auth)
-app.use('/api/user',user)
+app.use('/api/profile',limiter,profile)
+app.use('/api/auth',limiter,auth)
+app.use('/api/user',limiter,user)
 app.use('/api/admin',admin)
 
 app.get('/api/getcourses',mainpage)
