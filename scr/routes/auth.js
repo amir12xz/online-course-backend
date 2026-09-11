@@ -14,7 +14,7 @@ const changepasswordvalidator=require('./../validators/changepassword')
 const changepassword=require('./../controllers/changepassword')
 const checklogin=require('./../middlewares/islogin')
 const otpvalidator=require('./../validators/otpvalidator')
-// const turnstile=require('./../middlewares/turnstile')
+const turnstile=require('./../middlewares/turnstile')
 
 const authLimiter = rateLimit({
     windowMs:15*60*1000,
@@ -33,13 +33,13 @@ const otpLimiter = rateLimit({
 })
 
 
-route.post('/register',islogin/*,turnstile*/,registerValidator,validator,register.Register,register.checkotp)
+route.post('/register',islogin,turnstile,registerValidator,validator,register.Register,register.checkotp)
 route.post('/applyregister',islogin,otpvalidator,validator,register.applyregister)
 route.post('/register/otp-again',islogin,otpLimiter,register.tryotpagain)
 
-route.post('/login',islogin,authLimiter/*,turnstile*/,loginValidator,validator,login)
+route.post('/login',islogin,authLimiter,turnstile,loginValidator,validator,login)
 
-route.post('/forgotpassword/enterphone',islogin,forgotPhoneValidator,validator,forgotpassword.enterphone) 
+route.post('/forgotpassword/enterphone',islogin,turnstile,forgotPhoneValidator,validator,forgotpassword.enterphone) 
 route.post('/forgotpassword/otpagain',islogin,otpLimiter,forgotpassword.otpagain)
 route.post('/forgotpassword/entercode',islogin,otpvalidator,validator,forgotpassword.checkotp)
 
