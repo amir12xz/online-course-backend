@@ -1,6 +1,18 @@
 const {body}=require('express-validator')
 
 module.exports=[
+         body().custom((value, { req }) => {
+        const allowedFields = ['newpassword']
+        const receivedFields = Object.keys(req.body);
+        
+         
+        const extraFields = receivedFields.filter(field => !allowedFields.includes(field));
+        
+        if (extraFields.length > 0) {
+          throw new Error(`فیلدهای غیرمجاز: ${extraFields.join(', ')}`);
+        }
+        return true
+      }),
 body('newpassword')
     .notEmpty()
     .withMessage('رمز عبور جدید را وارد کنید').bail()

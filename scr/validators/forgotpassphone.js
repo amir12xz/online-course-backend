@@ -1,6 +1,18 @@
 const { body } = require("express-validator");
 
 module.exports = [
+   body().custom((value, { req }) => {
+      const allowedFields = [  'phone' ]
+      const receivedFields = Object.keys(req.body);
+      
+       
+      const extraFields = receivedFields.filter(field => !allowedFields.includes(field));
+      
+      if (extraFields.length > 0) {
+        throw new Error(`فیلدهای غیرمجاز: ${extraFields.join(', ')}`);
+      }
+      return true
+    }),
   body("phone")
     .trim()
     .notEmpty()

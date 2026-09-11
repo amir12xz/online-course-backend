@@ -1,3 +1,5 @@
+const fs = require('fs')
+const path = require('path')
 const transactionmodel = require('./../models/transaction')
 const applyreceip = require('./../integrations/sms/applyreceipt')
 
@@ -35,6 +37,18 @@ module.exports = async (req, res) => {
             receipt.user.phone,
             receipt.course.title
         )
+
+            if (receipt.image) {
+            const filePath = path.join(
+                __dirname,
+                '../public/receips',
+                receipt.image
+            )
+
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
 
         return res.status(200).json({
             success:true,

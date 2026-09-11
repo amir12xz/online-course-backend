@@ -4,16 +4,16 @@ const {body}=require('express-validator')
 module.exports=[
 
  body().custom((value, { req }) => {
-    const allowedFields = ['name', 'lastname', 'phone', 'password'];
+    const allowedFields = ['name', 'lastname', 'phone', 'password','captchaToken']
     const receivedFields = Object.keys(req.body);
     
-    // فیلدهای اضافی رو پیدا کن
+     
     const extraFields = receivedFields.filter(field => !allowedFields.includes(field));
     
     if (extraFields.length > 0) {
       throw new Error(`فیلدهای غیرمجاز: ${extraFields.join(', ')}`);
     }
-    return true;
+    return true
   }),
 
 body('name')

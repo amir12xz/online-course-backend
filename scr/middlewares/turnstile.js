@@ -32,7 +32,7 @@ module.exports=async(req, res, next)=>{
       })
     }
 
-    next()
+   return next()
   } catch (err) {
     console.error('Turnstile verification error:', err.message)
     return res.status(500).json({
